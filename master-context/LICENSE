@@ -1,0 +1,122 @@
+ECCO Master Context · Public Edition
+Doctrinal architecture specification and accompanying artifacts.
+
+Copyright (c) 2025–2026 Jeremiah Wade Hearne / Ethereal Connections Co.
+
+This work is licensed under the Creative Commons
+Attribution-NonCommercial-NoDerivatives 4.0 International License.
+
+────────────────────────────────────────────────────────────
+
+You are free to:
+
+  Share — copy and redistribute the material in any medium or
+  format for any non-commercial purpose, provided you give
+  appropriate credit to Ethereal Connections Co. and link back
+  to https://etherealconnectionsco.com.
+
+Under the following terms:
+
+  Attribution — You must give appropriate credit, provide a
+  link to the license, and indicate if changes were made.
+  Credit must read: "Source: ECCO Master Context — Ethereal
+  Connections Co. (etherealconnectionsco.com)"
+
+  NonCommercial — You may not use the material for commercial
+  purposes. This includes, but is not limited to, repackaging,
+  rebranding, or incorporating any portion of this work into a
+  paid product, paid newsletter, paid course, or any commercial
+  offering.
+
+  NoDerivatives — If you remix, transform, or build upon the
+  material, you may not distribute the modified material.
+
+  No additional restrictions — You may not apply legal terms or
+  technological measures that legally restrict others from doing
+  anything the license permits.
+
+────────────────────────────────────────────────────────────
+
+Notices:
+
+  This license does NOT cover:
+
+    — The doctrine, framework, or written methodology of the
+      "Global Sanctuary Rebuild," "Provenance Echo," "Anti-Entropy
+      Protocol," "Cultural Universalism," or any other named
+      conceptual framework authored by Jeremiah Wade Hearne.
+      These are reserved separately under all rights reserved.
+
+    — The visual identity of Ethereal Connections Co., including
+      but not limited to: the ECCO seal, the diamond-glass
+      aesthetic, the flower-of-life and pendulum medallion
+      design language, the teal/cream color system, and any
+      associated trade dress. These are protected as the trade
+      dress and unregistered marks of Ethereal Connections Co.
+
+    — Third-party content referenced via external URLs. Those
+      works remain the property of their respective owners and
+      are cited under fair use for research and commentary
+      purposes.
+
+  COMMERCIAL USE REQUIRES WRITTEN PERMISSION.
+  For licensing inquiries, partnership proposals, or any
+  commercial use of this work, contact:
+  jeremiah@etherealconnectionsco.com
+
+  Full license text:
+  https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode
+
+  License identifier (SPDX): CC-BY-NC-ND-4.0
+
+────────────────────────────────────────────────────────────
+
+Scope of this license:
+
+This license covers the ECCO Master Context Public Edition
+specification text and accompanying typographic and visual
+artifacts in this repository. The Master Context is an
+archival reference work: a doctrinal architecture specification
+intended to be read, cited, and linked, but not adapted or
+repackaged. ND is therefore deliberate.
+
+ECCO operates this repository under a public-research posture
+for its diagnostic and educational surfaces (such as this
+Master Context) and a closed posture for its commercial and
+revenue-generating surfaces. The visibility of this repository
+reflects that posture; it is not an invitation to repackage,
+resell, or otherwise capture the work for purposes that do not
+credit or sustain its source.
+
+Per the structural-replicability doctrine in §J of the
+specification, the architecture is intentionally inspectable.
+The license restrictions above govern reproduction and
+adaptation of this document; they do not impair another firm's
+right to operate their own architecture using whatever frame
+they author themselves.
+
+────────────────────────────────────────────────────────────
+
+Version history of this license file:
+
+  Initial commit of master-context — CC BY-NC-ND 4.0,
+  inherited from the LICENSE template authored for the ECCO
+  Scanner (scan.etherealconnectionsco.com).
+
+  v1.0 of Master Context onward — CC BY-NC-ND 4.0, with
+  Attribution string corrected from "ECCO Scanner" to
+  "ECCO Master Context" and the Scope section re-authored
+  for this artifact's purpose.
+
+The license class (CC BY-NC-ND 4.0) is retained because the
+Master Context is the default-case archival reference work
+the ECCO Deploy Playbook §2.1 identifies as fitting BY-NC-ND.
+The substitution was attribution-string only; the legal terms
+are unchanged. Per Deploy Playbook §6.2 (Template-inherited
+license contradicting artifact purpose), this audit was
+performed at first deploy.
+
+────────────────────────────────────────────────────────────
+
+Provenance over performance. Infrastructure over influence.
+Doctrine over excuse.

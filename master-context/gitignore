@@ -1,0 +1,27 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Node (in case anyone runs the checker locally)
+node_modules/
+npm-debug.log
+.npm/
+
+# Build artifacts (none expected, but defensive)
+dist/
+build/
+.netlify/
+
+# Logs
+*.log
+
+# Temp / scratch
+*.tmp
+*.bak
+.scratch/

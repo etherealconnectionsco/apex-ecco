@@ -1,0 +1,61 @@
+# ═══════════════════════════════════════════════════════════
+#  Netlify configuration — ECCO Master Context (Public Edition)
+#  Static site. CI-gated link integrity per Deploy Playbook §3.
+#  Headers + caching + redirects + pre-deploy link check.
+# ═══════════════════════════════════════════════════════════
+
+[build]
+  publish = "."
+  command = "node check-links.mjs"
+
+[build.environment]
+  # Self-reference URL for check-links.mjs. The doc cites its own
+  # canonical URL in the header and footer; without this env var,
+  # the link checker would 404 on the canonical link during first
+  # deploy (chicken-and-egg). Setting MASTER_CONTEXT_CANONICAL tells
+  # the checker to skip URLs matching this prefix.
+  #
+  # The canonical is an apex path (etherealconnectionsco.com/master-context)
+  # rather than a subdomain. The apex routing for this path is wired at
+  # the apex site's config layer; this repo deploys to its assigned
+  # *.netlify.app URL and is served at the apex path via apex-level
+  # rewrite.
+  MASTER_CONTEXT_CANONICAL = "https://etherealconnectionsco.com/master-context"
+
+# ─── SECURITY HEADERS — applied to all routes ──────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
+# ─── CACHING — seal is immutable per deploy ────────────────
+[[headers]]
+  for = "/seal.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ─── CACHING — HTML is short-lived so revisions ship fast ──
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"
+
+# ─── REDIRECTS — canonical path collapses to root ──────────
+# When the doc is reached from the apex via /master-context or
+# /master-context/, both resolve to root. Inbound trailing-slash
+# variants are normalized.
+[[redirects]]
+  from = "/master-context"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/master-context/*"
+  to = "/:splat"
+  status = 301
+  force = true
