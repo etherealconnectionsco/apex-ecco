@@ -1,7 +1,22 @@
 #!/usr/bin/env node
 /**
- * ECCO link integrity check — v5.4 (multi-target + cloud-tolerant + comment-aware)
+ * ECCO link integrity check — v5.5 (multi-target + cloud-tolerant + comment-aware + pretty-URL)
  * ---------------------------------------------------------------
+ * v5.4 → v5.5 changes (20 May 2026, post-v6 thread):
+ *   * Pretty-URL fallback in checkLocal. Netlify auto-strips .html
+ *     extensions at serve time, so canonical clean URLs like
+ *     /privacy-policy and /terms appear extensionless throughout the
+ *     site (apex footer, privacy-policy.html, terms.html, /why) —
+ *     these resolve correctly in production but were tripping the
+ *     filesystem checker, which looked for a literal extensionless
+ *     file on disk and declared missing. v5.5 changes the failure
+ *     branch: if access(path) fails AND the path has no extension,
+ *     also try access(path + '.html') before declaring missing.
+ *     The checker now models Netlify's actual serving behavior.
+ *   No new targets. No tolerance machinery. Surgical to checkLocal.
+ *   Doctrinal: source-of-truth stays the canonical clean URL; the
+ *   checker becomes a more accurate model of production.
+ *
  * v5.3 → v5.4 changes (20 May 2026, post-v6 thread):
  *   + why/index.html added as 5th target (selfEnvVar: null)
  *   + 404_main_site.html added as 6th target (selfEnvVar: null)
@@ -240,6 +255,16 @@ async function checkLocal(linkPath, baseDir) {
     await access(fsPath, constants.R_OK);
     return { ok: true, kind: 'local', path: fsPath };
   } catch {
+    // v5.5: Netlify "Pretty URLs" — extensionless paths resolve to
+    // .html at serve time. If the bare path is missing AND has no
+    // extension, try the .html sibling before declaring broken.
+    const hasExtension = /\.[a-z0-9]+$/i.test(cleaned);
+    if (!hasExtension) {
+      try {
+        await access(fsPath + '.html', constants.R_OK);
+        return { ok: true, kind: 'local-pretty', path: fsPath + '.html' };
+      } catch { /* fall through */ }
+    }
     return { ok: false, kind: 'local-missing', path: fsPath };
   }
 }
@@ -460,7 +485,7 @@ async function checkTarget(target) {
 //  MAIN
 // ═══════════════════════════════════════════════════════════
 async function main() {
-  console.log(color('dim', `\n  ECCO link integrity check v5.4 · ${TARGETS.length} target${TARGETS.length === 1 ? '' : 's'}`));
+  console.log(color('dim', `\n  ECCO link integrity check v5.5 · ${TARGETS.length} target${TARGETS.length === 1 ? '' : 's'}`));
 
   const results = [];
   for (const target of TARGETS) {
