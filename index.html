@@ -108,7 +108,7 @@
         .nav-subtab-sep { color: var(--teal-dim); font-size: 0.6rem; opacity: 0.4; }
 
         /* --- HERO SECTION --- */
-        .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; opacity: 0; transition: opacity 2s; padding-top: 250px; }
+        .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; opacity: 0; transition: opacity 2s; padding-top: 360px; }
         
         /* Scene container — 240px (¼" smaller) */
         .orb-scene { position: relative; width: 240px; height: 240px; perspective: 1000px; cursor: grab; z-index: 2; margin-top: 20px; margin-bottom: 100px; transition: filter 0.4s ease; }
@@ -654,15 +654,61 @@ width: 400px; height: 400px; border-radius: 50%;
             .heart-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; position: relative; }
 
         .heart-container {
-            width: 95%; max-width: 1100px; background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            width: 95%; max-width: 1100px;
+            /* DAYLIGHT: no painted core. Transparent so BOTH portal cutouts in the glass
+               see straight through to the live neural canvas (= white neural fabric).
+               Nova mode repaints its own soft dark interior via the override below. */
+            background: transparent;
             border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 24px;
             padding: 70px 50px; position: relative;
-            box-shadow: inset 0 0 0 1px #fff, 0 20px 60px rgba(0, 168, 168, 0.1);
             opacity: 0; transform: translateY(20px); transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            isolation: isolate;
         }
+        /* Glass substrate as pseudo-element. Sharp 3px mask edge (218→221px) — no gradient-gray
+           transition zone. Where masked transparent, the heart-container's dark backdrop shows,
+           and behind that the neural canvas. */
+        .heart-container::before {
+            content: ''; position: absolute; inset: 0;
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border-radius: inherit;
+            box-shadow: inset 0 0 0 1px #fff, 0 20px 60px rgba(0, 168, 168, 0.1);
+            z-index: -1;
+            transition: background 0.9s ease, backdrop-filter 0.9s ease, -webkit-backdrop-filter 0.9s ease;
+            /* TWO holes punched in the glass: lower portal (218px) + upper portal (200px).
+               mask-composite intersect / -webkit source-in multiplies the layers so the glass
+               is cut where EITHER radial is transparent (union of holes). */
+            -webkit-mask-image:
+                radial-gradient(circle at var(--portal-x, 50%) var(--portal-y, 68%), transparent 0, transparent 218px, black 221px, black 100%),
+                radial-gradient(circle at var(--upper-x, 50%) var(--upper-y, 18%), transparent 0, transparent 200px, black 203px, black 100%);
+            -webkit-mask-composite: source-in;
+                    mask-image:
+                radial-gradient(circle at var(--portal-x, 50%) var(--portal-y, 68%), transparent 0, transparent 218px, black 221px, black 100%),
+                radial-gradient(circle at var(--upper-x, 50%) var(--upper-y, 18%), transparent 0, transparent 200px, black 203px, black 100%);
+                    mask-composite: intersect;
+        }
+        /* Cut-edge rim — bright teal halo precisely at the cut edge. Peak alpha 0.65 right at
+           the mask boundary so the lip reads as a defined cut, not ambient decoration. */
+        .heart-container::after {
+            content: ''; position: absolute; inset: 0;
+            pointer-events: none;
+            border-radius: inherit;
+            z-index: 0;
+            background: radial-gradient(
+                circle at var(--portal-x, 50%) var(--portal-y, 68%),
+                transparent 0,
+                transparent 216px,
+                rgba(0, 240, 255, 0.65) 220px,
+                rgba(0, 240, 255, 0.40) 226px,
+                rgba(0, 240, 255, 0.18) 238px,
+                transparent 256px,
+                transparent 100%
+            );
+            transition: opacity 0.9s ease, background 0.9s ease;
+        }
+        .heart-container > * { position: relative; z-index: 1; }
         .white-room-mode .heart-container { opacity: 1; transform: translateY(0); }
-        .white-room-mode #hero-section, .white-room-mode #pillars, .white-room-mode #vanguard, .white-room-mode #main-header, .white-room-mode footer, .white-room-mode .legacy-section, .white-room-mode .mailing-list-section, .white-room-mode .contact-founder-wrapper, .white-room-mode .funnel-section { display: none !important; }
+        .white-room-mode #hero-section, .white-room-mode #pillars, .white-room-mode #vanguard, .white-room-mode #main-header, .white-room-mode footer, .white-room-mode .legacy-section, .white-room-mode .mailing-list-section, .white-room-mode .contact-founder-wrapper, .white-room-mode .funnel-section, .white-room-mode .transparency-audit-section { display: none !important; }
 
         .transparency-title {
             font-family: 'Rajdhani', sans-serif; font-size: clamp(2rem, 5vw, 3.8rem);
@@ -683,116 +729,404 @@ width: 400px; height: 400px; border-radius: 50%;
         .glass-input { width: 100%; max-width: 650px; min-height: 80px; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(0, 168, 168, 0.4); border-radius: 16px; padding: 20px 25px; font-family: 'Inter', sans-serif; font-size: 1.1rem; color: #1a1a1a; outline: none; resize: vertical; box-shadow: inset 0 2px 10px rgba(0,168,168,0.05); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center; }
         .glass-input:focus { border-color: var(--teal-core); box-shadow: 0 10px 30px rgba(0,168,168,0.1); }
         
-        .archive-button-container { display: inline-flex; justify-content: center; align-items: center; width: 140px; height: 140px; cursor: pointer; margin-top: 30px; position: relative; }
-        .archive-halo-svg { position: absolute; width: 100%; height: 100%; fill: none; stroke: var(--teal-core); stroke-width: 1.5; filter: drop-shadow(0 0 5px rgba(0,168,168,0.2)); transition: 0.3s; animation: gentle-pulse 4s infinite alternate; }
-        .archive-button-container:hover .archive-halo-svg { stroke-width: 2; filter: drop-shadow(0 0 15px rgba(0,168,168,0.4)); transform: scale(1.05); }
-        
-        .archive-text-overlay { font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; font-weight: 800; letter-spacing: 6px; color: #333; text-transform: uppercase; position: relative; z-index: 10; transition: all 0.3s ease; pointer-events: none; }
-        .archive-button-container:hover .archive-text-overlay { color: #111; }
-        .archive-text-overlay.archived { color: #000 !important; transform: scale(2); opacity: 0; transition: all 1.2s ease-out; text-shadow: none !important; }
+        /* ── HEART PORTAL (replaces former .archive-button-container) ──
+           Amplification upper-portal layout, recolored to teal-core.
+           Lives in a cutout punched through the white glass so the
+           neural-canvas shows through. Two states: flower (pre-archive),
+           seal (post-archive). State swap drives the swap from "archive"
+           to "exit". */
+
+        .heart-portal {
+            position: relative;
+            width: 416px; height: 416px;
+            margin: 130px auto 60px;
+            cursor: pointer;
+        }
+        .heart-portal-flower,
+        .heart-portal-seal {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.9s ease;
+        }
+        .heart-portal-flower { opacity: 1; }
+        .heart-portal-seal { opacity: 0; pointer-events: none; transition: opacity 0.9s ease 0.3s; }
+        .heart-portal.seal-state .heart-portal-flower { opacity: 0; pointer-events: none; }
+        .heart-portal.seal-state .heart-portal-seal { opacity: 1; pointer-events: auto; }
+
+        /* Outer ring — DAYLIGHT: ONE clean teal-core edge riding the black (no white step
+           ring). Outer cyan glow only; the ::after lip supplies the black it sits against. */
+        .hp-ring {
+            position: absolute; top: 50%; left: 50%;
+            width: 100%; height: 100%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 1px solid rgba(0, 240, 255, 0.7);
+            box-shadow:
+                0 0 6px  rgba(0, 240, 255, 0.55),
+                0 0 18px rgba(0, 240, 255, 0.35),
+                0 0 40px rgba(0, 240, 255, 0.18);
+            pointer-events: none;
+        }
+        .hp-ring::before {
+            content: ''; position: absolute; inset: 5px;
+            border-radius: 50%;
+            border: 0.5px dashed rgba(0, 240, 255, 0.25);
+        }
+        /* DAYLIGHT: black inner lip just inside the teal rim → reads as a cut hole with depth.
+           Full black at the rim, fading inward to transparent (the seat the teal edge rides on). */
+        .hp-ring::after {
+            content: ''; position: absolute; inset: 1px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 50%,
+                transparent 0,
+                transparent 58%,
+                rgba(0,0,0,0.35) 78%,
+                rgba(0,0,0,0.85) 92%,
+                #000 99%);
+            pointer-events: none;
+        }
+        /* Dark room: original teal+white-specular ring, restored EXACTLY. */
+        .heart-container.heart-nova-mode .hp-ring::after { box-shadow: none; }
+        .heart-container.heart-nova-mode .hp-ring {
+            border: 1px solid rgba(0, 240, 255, 0.42);
+            box-shadow:
+                inset 0 0 60px rgba(0, 240, 255, 0.18),
+                inset 0 0 1px rgba(255, 255, 255, 0.5),
+                0 0 80px rgba(0, 240, 255, 0.22),
+                0 0 1px rgba(255, 255, 255, 0.4);
+        }
+
+        /* THREE flower-of-life layers: one fixed anchor + one CW + one CCW.
+           PAUSE-AT-CANONICAL: at every hold, CW/CCW land at multiples of 60° (the FOL symmetry
+           period) and overlap the fixed layer EXACTLY → all three read as one pure canonical
+           Flower of Life. During motion they diverge into dynamic moiré. 6 canonical moments / 90s. */
+        .hp-flowers {
+            position: absolute; top: 50%; left: 50%;
+            width: 384px; height: 384px;  /* DAYLIGHT: grown to almost touch the black ring */
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .hp-flowers > svg {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            opacity: 0; fill: none;
+            animation-fill-mode: forwards;
+        }
+        .hp-flower-fixed { transform: rotate(0deg);  animation: hp-fade 1.0s ease forwards 0.4s; }
+        .hp-flower-cw    { animation: hp-fade 1.0s ease forwards 0.8s, hp-spin-cw  90s linear infinite 0.4s; }
+        .hp-flower-ccw   { animation: hp-fade 1.0s ease forwards 1.2s, hp-spin-ccw 90s linear infinite 0.4s; }
+        /* Each 16.667% block = 60° advance then a ~3s hold at a multiple of 60° → exact coincide. */
+        @keyframes hp-spin-cw {
+              0%      { transform: rotate(0deg);   }
+             13.333% { transform: rotate(60deg);  }  16.667% { transform: rotate(60deg);  }
+             30%     { transform: rotate(120deg); }  33.333% { transform: rotate(120deg); }
+             46.667% { transform: rotate(180deg); }  50%     { transform: rotate(180deg); }
+             63.333% { transform: rotate(240deg); }  66.667% { transform: rotate(240deg); }
+             80%     { transform: rotate(300deg); }  83.333% { transform: rotate(300deg); }
+             96.667% { transform: rotate(360deg); }  100%    { transform: rotate(360deg); }
+        }
+        @keyframes hp-spin-ccw {
+              0%      { transform: rotate(0deg);    }
+             13.333% { transform: rotate(-60deg);  }  16.667% { transform: rotate(-60deg);  }
+             30%     { transform: rotate(-120deg); }  33.333% { transform: rotate(-120deg); }
+             46.667% { transform: rotate(-180deg); }  50%     { transform: rotate(-180deg); }
+             63.333% { transform: rotate(-240deg); }  66.667% { transform: rotate(-240deg); }
+             80%     { transform: rotate(-300deg); }  83.333% { transform: rotate(-300deg); }
+             96.667% { transform: rotate(-360deg); }  100%    { transform: rotate(-360deg); }
+        }
+        @keyframes hp-fade     { to { opacity: 1; } }
+
+        /* DAYLIGHT: outer flower all BLACK hairline on the white neural fabric.
+           non-scaling-stroke keeps literal px width regardless of the 600 viewBox scale. */
+        .hp-petal {
+            stroke: #000; stroke-width: 2.8; opacity: 0.5;
+            vector-effect: non-scaling-stroke;
+        }
+
+        /* THREE seed-of-life layers (fixed/CW/CCW) — DAYLIGHT: hidden (too cluttered against
+           the dense outer 61-circle FOL). DARK ROOM: restored, teal-dim glow. */
+        .hp-seed {
+            position: absolute; top: 50%; left: 50%;
+            width: 240px; height: 240px;  /* DAYLIGHT: grown proportionally with the flower */
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            display: none;
+        }
+        .heart-container.heart-nova-mode .hp-seed { display: block; }
+        .hp-seed > svg {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            opacity: 0; fill: none;
+        }
+        .hp-seed-fixed > svg { transform: rotate(0deg); animation: hp-fade 1.0s ease forwards 1.4s; }
+        .hp-seed-cw    > svg { animation: hp-fade 1.0s ease forwards 1.6s, hp-spin-seed-cw  160s linear infinite 0.4s; }
+        .hp-seed-ccw   > svg { animation: hp-fade 1.0s ease forwards 1.8s, hp-spin-seed-ccw 160s linear infinite 0.4s; }
+        @keyframes hp-spin-seed-cw  { from { transform: rotate(20deg); } to { transform: rotate(380deg);  } }
+        @keyframes hp-spin-seed-ccw { from { transform: rotate(40deg); } to { transform: rotate(-320deg); } }
+
+        /* DAYLIGHT: inner seed flower all BLACK hairline. */
+        .hp-petal-seed {
+            stroke: #000; stroke-width: 0.95; opacity: 0.6;
+            vector-effect: non-scaling-stroke;
+        }
+        /* ── DARK ROOM (nova) — teal-dim outer + inner flower, restored EXACTLY ── */
+        .heart-container.heart-nova-mode .hp-petal {
+            stroke: var(--teal-dim);
+            filter:
+                drop-shadow(0 0 1.5px rgba(0, 168, 168, 0.75))
+                drop-shadow(0 0 6px rgba(0, 168, 168, 0.35));
+        }
+        .heart-container.heart-nova-mode .hp-petal-seed {
+            stroke: var(--teal-dim);
+            filter:
+                drop-shadow(0 0 2px rgba(0, 168, 168, 0.95))
+                drop-shadow(0 0 7px rgba(0, 168, 168, 0.55))
+                drop-shadow(0 0 18px rgba(0, 168, 168, 0.25));
+        }
+        /* Dark room: original flower + seed sizes restored. */
+        .heart-container.heart-nova-mode .hp-flowers { width: 312px; height: 312px; }
+        .heart-container.heart-nova-mode .hp-seed    { width: 195px; height: 195px; }
+
+        /* ARCHIVE text — pulsing centerpiece. DAYLIGHT: white legibility halo only (teal
+           removed so it reads on the white fabric). DARK ROOM: teal-cyan pulse restored. */
+        .hp-archive-text {
+            position: relative; z-index: 5;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.8rem; font-weight: 800;
+            letter-spacing: 9px; text-transform: uppercase;
+            color: #1a1a1a;
+            text-shadow:
+                0 0 5px rgba(255, 255, 255, 0.95),
+                0 0 12px rgba(255, 255, 255, 0.7),
+                0 0 22px rgba(255, 255, 255, 0.4);
+            animation: hp-archive-pulse 2.6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes hp-archive-pulse {
+            0%, 100% {
+                text-shadow: 0 0 5px rgba(255,255,255,0.95), 0 0 12px rgba(255,255,255,0.7), 0 0 22px rgba(255,255,255,0.4);
+                transform: scale(1);
+            }
+            50% {
+                text-shadow: 0 0 7px rgba(255,255,255,1.0), 0 0 16px rgba(255,255,255,0.85), 0 0 30px rgba(255,255,255,0.55);
+                transform: scale(1.04);
+            }
+        }
+        /* Dark room: ARCHIVE keeps its teal pulse, restored EXACTLY. */
+        .heart-container.heart-nova-mode .hp-archive-text {
+            text-shadow:
+                0 0 4px rgba(255, 255, 255, 0.85),
+                0 0 14px rgba(0, 240, 255, 0.5),
+                0 0 28px rgba(0, 240, 255, 0.3);
+            animation: hp-archive-pulse-nova 2.6s ease-in-out infinite;
+        }
+        @keyframes hp-archive-pulse-nova {
+            0%, 100% { text-shadow: 0 0 4px rgba(255,255,255,0.85), 0 0 14px rgba(0,240,255,0.5),  0 0 28px rgba(0,240,255,0.3);  transform: scale(1);    }
+            50%      { text-shadow: 0 0 6px rgba(255,255,255,0.95), 0 0 22px rgba(0,240,255,0.85), 0 0 44px rgba(0,240,255,0.5);  transform: scale(1.04); }
+        }
+        .heart-portal-flower:hover .hp-archive-text { color: #000; }
+
+        /* ECCO seal at portal location — post-archive exit (re-uses existing return-seal mechanism, resized to fit cutout) */
+        .heart-portal-seal .hp-return-seal {
+            display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+            text-decoration: none; position: relative;
+            width: 312px; height: 312px;
+            cursor: pointer;
+            transition: transform 0.4s;
+        }
+        .heart-portal-seal .hp-return-seal:hover { transform: scale(1.06); }
+        .heart-portal-seal .hp-return-seal-img {
+            width: 140px; height: 140px; border-radius: 50%;
+            box-shadow: inset 0 0 0 1px #fff, 0 10px 30px rgba(0, 168, 168, 0.15);
+            border: 2px solid rgba(0, 168, 168, 0.65);
+            object-fit: cover; position: absolute; z-index: 2;
+            transition: 0.3s;
+        }
+        .heart-portal-seal .hp-return-seal:hover .hp-return-seal-img {
+            border-color: var(--teal-core);
+            box-shadow: inset 0 0 0 1px #fff, 0 0 45px rgba(0, 240, 255, 0.4);
+        }
+        .heart-portal-seal .hp-return-orbit-svg {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            animation: spinText 22s linear infinite;
+            pointer-events: none; z-index: 1;
+        }
+        .heart-portal-seal .hp-return-orbit-text {
+            font-family: 'Rajdhani'; font-weight: 700;
+            font-size: 17px; fill: #888;
+            letter-spacing: 5px; text-transform: uppercase;
+            transition: fill 0.3s;
+        }
+        .heart-portal-seal .hp-return-seal:hover .hp-return-orbit-text { fill: var(--teal-core); }
+
+        /* ═══ HEART UPPER PORTAL = amplification's LOWER portal (.fol-seam) ═══
+           A 12-petal seed-of-life skeleton (Set A 12 subpaths + Set B 30° clone) floating over
+           a circular cut to the live neural field. STATIC (seam doctrine). Petals scaled 1.14×
+           about center so the tips push proud of the perimeter ring. DAYLIGHT: teal-core edge
+           glow + opaque teal-glass fills + crisp black trace + black depth hairline + black
+           inner-lip ring. DARK ROOM: amplification gold/white + white-specular ring (skeleton). */
+        .heart-upper-portal {
+            position: relative;
+            width: 416px; height: 416px;
+            margin: 0 auto 70px;
+            border-radius: 50%;
+            display: grid; place-items: center;
+            background: transparent;
+        }
+        .hup-seam { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+        .hup-seam-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+        /* Perimeter ring — DAYLIGHT: teal-core glow (white-specular vanishes on white). */
+        .hup-seam-ring {
+            position: absolute; inset: 0;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 240, 255, 0.55);
+            box-shadow:
+                0 0 1px  rgba(0, 240, 255, 0.90),
+                0 0 14px rgba(0, 240, 255, 0.45),
+                0 0 40px rgba(0, 240, 255, 0.22),
+                0 0 70px rgba(0, 240, 255, 0.12),
+                inset 0 0 25px rgba(0, 240, 255, 0.08);
+            pointer-events: none; z-index: 0;
+        }
+        /* DAYLIGHT: black line on the ring for depth (cut read). Off in nova. */
+        .hup-seam-ring::after {
+            content: ''; position: absolute; inset: 1px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.85);
+            box-shadow: inset 0 0 14px 2px rgba(0, 0, 0, 0.55);
+            pointer-events: none;
+        }
+        .heart-container.heart-nova-mode .hup-seam-ring::after { display: none; }
+        /* Edge glow — DAYLIGHT: TEAL-CORE (gold/white washes out on the white fabric). */
+        .hup-seam-glow-gold {
+            stroke: var(--teal-core);
+            filter:
+                drop-shadow(0 0 8px   rgba(0, 240, 255, 0.95))
+                drop-shadow(0 0 33px  rgba(0, 240, 255, 0.55))
+                drop-shadow(0 0 83px  rgba(0, 240, 255, 0.28))
+                drop-shadow(0 0 150px rgba(0, 240, 255, 0.16));
+        }
+        .hup-seam-glow-white {
+            stroke: var(--teal-core);
+            filter:
+                drop-shadow(0 0 8px  rgba(0, 240, 255, 1.00))
+                drop-shadow(0 0 25px rgba(0, 240, 255, 0.75));
+        }
+        /* Opaque teal-glass petal fills (fade out in nova → glowing skeleton). */
+        .hup-petal-fill { transition: opacity 0.8s ease; }
+        /* DAYLIGHT: black hairline + outward depth halo just outside each petal edge. */
+        .hup-petal-depth {
+            transition: opacity 0.8s ease;
+            filter:
+                drop-shadow(0 0 2px rgba(0,0,0,0.9))
+                drop-shadow(0 0 6px rgba(0,0,0,0.6))
+                drop-shadow(0 0 12px rgba(0,0,0,0.35));
+        }
+        /* DAYLIGHT: full crisp black trace on every petal outline. */
+        .hup-petal-trace { transition: opacity 0.8s ease; opacity: 0.85; }
+
+        /* ── DARK ROOM (nova) — amplification's gold/white, restored EXACTLY ── */
+        .heart-container.heart-nova-mode .hup-seam-ring {
+            border-color: rgba(255, 255, 255, 0.72);
+            box-shadow:
+                0 0 1px  rgba(255, 255, 255, 0.90),
+                0 0 10px rgba(255, 255, 255, 0.45),
+                0 0 35px rgba(255, 255, 255, 0.18),
+                0 0 67px rgba(201, 169, 106, 0.20),
+                inset 0 0 25px rgba(201, 169, 106, 0.06);
+        }
+        .heart-container.heart-nova-mode .hup-seam-glow-gold {
+            stroke: #d8b87a;
+            filter:
+                drop-shadow(0 0 8px   rgba(255, 255, 255, 0.95))
+                drop-shadow(0 0 33px  rgba(255, 255, 255, 0.60))
+                drop-shadow(0 0 83px  rgba(255, 255, 255, 0.28))
+                drop-shadow(0 0 150px rgba(201, 169, 106, 0.40));
+        }
+        .heart-container.heart-nova-mode .hup-seam-glow-white {
+            stroke: rgba(255, 255, 255, 0.88);
+            filter:
+                drop-shadow(0 0 8px  rgba(255, 255, 255, 1.00))
+                drop-shadow(0 0 25px rgba(255, 255, 255, 0.75));
+        }
+        /* Petal fills + black trace + black hairline all fade → glowing skeleton in nova. */
+        .heart-container.heart-nova-mode .hup-petal-fill  { opacity: 0; }
+        .heart-container.heart-nova-mode .hup-petal-depth { opacity: 0; }
+        .heart-container.heart-nova-mode .hup-petal-trace { opacity: 0; }
+
+        /* Legacy bottom return-seal is now redundant — exit lives at the portal location */
+        .heart-return-wrapper { display: none; }
+
         #heart-success-msg { display: none; font-family: 'Rajdhani', sans-serif; font-size: 1.4rem; color: var(--teal-core); line-height: 1.6; margin-top: 40px; font-weight: 700; letter-spacing: 2px; text-align: center; }
 
-        .heart-return-wrapper { display: flex; justify-content: center; margin-top: 90px; margin-bottom: 20px; }
-        .heart-return-seal { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; position: relative; width: 220px; height: 220px; transition: transform 0.4s; }
-        .heart-return-seal:hover { transform: scale(1.1); }
-        .return-seal-img { width: 100px; height: 100px; border-radius: 50%; box-shadow: inset 0 0 0 1px #fff, 0 10px 30px rgba(0,168,168,0.1); border: 2px solid rgba(0,168,168,0.6); object-fit: cover; position: absolute; z-index: 2; transition: 0.3s; }
-        .heart-return-seal:hover .return-seal-img { border-color: var(--teal-core); box-shadow: inset 0 0 0 1px #fff, 0 0 40px rgba(0,168,168,0.3); }
-        .return-orbit-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; animation: spinText 20s linear infinite; pointer-events: none; z-index: 1; }
-        .heart-return-seal .return-orbit-text { font-family: 'Rajdhani'; font-weight: 700; font-size: 12px; fill: #888; letter-spacing: 3.5px; text-transform: uppercase; transition: color 0.3s, fill 0.3s; }
-        .heart-return-seal:hover .return-orbit-text { fill: var(--teal-core); }
 
-        /* --- HEART ROOM NOVA MODE (post-archive) --- */
+        /* --- HEART ROOM NOVA MODE (post-archive) ---
+           Body goes black, neural canvas brightens, heart-container's ::before
+           glass swaps white → smoked. The mask cutout stays at --portal-x /
+           --portal-y, so the now-dark glass reveals neural canvas through the
+           same circular hole where the flower lived (and where the seal now sits). */
         .heart-nova-active { background: #000 !important; }
         .heart-nova-active::before { background: #000 !important; }
         .heart-nova-active #neural-canvas { opacity: 1 !important; filter: brightness(2.5) saturate(1.8); }
+
         .heart-container.heart-nova-mode {
-            background: rgba(0,0,0,0.35) !important;
-            backdrop-filter: blur(24px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-            border-color: rgba(255,255,255,0.15) !important;
-            border-top-color: rgba(255,255,255,0.12) !important;
-            border-left-color: rgba(255,255,255,0.08) !important;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 20px 60px rgba(0,0,0,0.4) !important;
+            /* Softer dark interior in nova-mode — canvas is now brightness(2.5), let it shine through */
+            background: radial-gradient(
+                circle at var(--portal-x, 50%) var(--portal-y, 68%),
+                rgba(8, 9, 12, 0.32) 0,
+                rgba(8, 9, 12, 0.22) 180px,
+                rgba(8, 9, 12, 0.08) 215px,
+                transparent 220px,
+                transparent 100%
+            ) !important;
+            border-color: rgba(255, 255, 255, 0.15) !important;
+            border-top-color: rgba(255, 255, 255, 0.12) !important;
+            border-left-color: rgba(255, 255, 255, 0.08) !important;
             transition: all 0.8s ease !important;
-            position: relative !important;
-            z-index: 2 !important;
-        }
-        .heart-container.heart-nova-mode .heart-copy,
-        .heart-container.heart-nova-mode .input-prompt { color: rgba(255,255,255,0.85) !important; }
-        .heart-container.heart-nova-mode #heart-success-msg { color: #00f0ff !important; }
-        .heart-container.heart-nova-mode .transparency-title { -webkit-text-stroke-color: rgba(255,255,255,0.4) !important; text-shadow: 0 0 20px rgba(0,240,255,0.3) !important; }
-        .heart-container.heart-nova-mode .dynamic-date { color: rgba(255,255,255,0.5) !important; }
-        .heart-container.heart-nova-mode .heart-return-seal .return-orbit-text { fill: rgba(255,255,255,0.5) !important; }
-        .heart-container.heart-nova-mode .heart-return-seal:hover .return-orbit-text { fill: var(--teal-core) !important; }
-        .heart-container.heart-nova-mode .return-seal-img { border-color: rgba(0,240,255,0.6) !important; box-shadow: 0 0 30px rgba(0,240,255,0.2) !important; }
-        /* NOVA MODE — tighten panel/response/seal so the flower + seal aren't lost in glass substrate */
-        .heart-container.heart-nova-mode #heart-success-msg { margin-top: 0 !important; }
-        .heart-container.heart-nova-mode .heart-return-wrapper { margin-top: 48px !important; margin-bottom: 0 !important; }
-        .archive-button-container.archive-nova-mode {
-            position: fixed !important;
-            width: 672px !important;
-            height: 672px !important;
-            pointer-events: none !important;
-            z-index: 14999 !important;
-            opacity: 1 !important;
-            margin-left: -336px !important;
-            margin-top: -336px !important;
-            animation: spinFlowerCW 30s linear infinite !important;
-            will-change: transform;
-        }
-        .heart-wrapper.nova-active {
-            position: relative;
-        }
-        .heart-container.heart-nova-mode {
-            background: transparent !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            border-color: transparent !important;
-            box-shadow: none !important;
-            padding: 50px 50px !important;
         }
         .heart-container.heart-nova-mode::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.35);
+            background: rgba(0, 0, 0, 0.35);
             backdrop-filter: blur(24px) saturate(180%);
             -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.15);
-            border-top-color: rgba(255,255,255,0.12);
-            border-left-color: rgba(255,255,255,0.08);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 20px 60px rgba(0,0,0,0.4);
-            z-index: -1;
-            -webkit-mask-image: radial-gradient(circle at var(--cutout-x, 50%) var(--cutout-y, 80%), transparent 85px, rgba(0,0,0,0.5) 90px, black 95px);
-            mask-image: radial-gradient(circle at var(--cutout-x, 50%) var(--cutout-y, 80%), transparent 85px, rgba(0,0,0,0.5) 90px, black 95px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 20px 60px rgba(0, 0, 0, 0.4);
         }
-        .archive-button-container.archive-nova-mode .archive-halo-svg {
-            stroke: #fff !important;
-            stroke-width: 3 !important;
-            filter: drop-shadow(0 0 40px rgba(0,240,255,0.9)) drop-shadow(0 0 80px rgba(0,240,255,0.6)) drop-shadow(0 0 130px rgba(0,240,255,0.3)) brightness(2.5) !important;
-            animation: heart-nova-pulse 1.5s ease-in-out infinite !important;
-            will-change: filter;
+        /* Nova-mode cut-edge rim — brighter teal halo against the dark glass */
+        .heart-container.heart-nova-mode::after {
+            background: radial-gradient(
+                circle at var(--portal-x, 50%) var(--portal-y, 68%),
+                transparent 0,
+                transparent 208px,
+                rgba(0, 240, 255, 0.38) 222px,
+                rgba(0, 240, 255, 0.18) 240px,
+                transparent 268px,
+                transparent 100%
+            );
         }
-        /* THIN TEAL-CORE OVERLAY FLOWER — half size, sits on top of white halo, rotates with parent's spinFlowerCW */
-        .archive-blue-overlay { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: transparent; stroke-width: 0; pointer-events: none; opacity: 0; transform: scale(0.5); transform-origin: 50% 50%; transition: opacity 0.6s ease; }
-        .archive-button-container.archive-nova-mode .archive-blue-overlay {
-            opacity: 1;
-            stroke: var(--teal-core);
-            stroke-width: 2.5;
-            filter: drop-shadow(0 0 2px rgba(0,240,255,1)) drop-shadow(0 0 6px rgba(0,240,255,0.7)) drop-shadow(0 0 14px rgba(0,240,255,0.35));
-            will-change: filter;
+        .heart-container.heart-nova-mode .heart-copy,
+        .heart-container.heart-nova-mode .input-prompt { color: rgba(255, 255, 255, 0.85) !important; }
+        .heart-container.heart-nova-mode #heart-success-msg { color: #00f0ff !important; }
+        .heart-container.heart-nova-mode .transparency-title {
+            -webkit-text-stroke-color: rgba(255, 255, 255, 0.4) !important;
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.3) !important;
         }
-        /* CCW CLONE — same color + size + glow, counter-rotates against parent at matched cadence */
-        .archive-button-container.archive-nova-mode .archive-blue-overlay-ccw {
-            animation: spinFlowerCCW 30s linear infinite;
+        .heart-container.heart-nova-mode .dynamic-date { color: rgba(255, 255, 255, 0.5) !important; }
+        /* Upper portal in nova mode — intensify the teal/gold halos against the dark room */
+        .heart-container.heart-nova-mode .heart-upper-portal {
+            box-shadow:
+                0 0 110px rgba(78, 212, 200, 0.28),
+                0 0 60px rgba(201, 169, 106, 0.12),
+                inset 0 0 50px rgba(78, 212, 200, 0.10) !important;
         }
-        @keyframes spinFlowerCCW {
-            0%   { transform: scale(0.5) rotate(0deg); }
-            100% { transform: scale(0.5) rotate(-720deg); }
+
+        /* Portal seal in nova mode — brighter rim, dim orbit text resting state */
+        .heart-container.heart-nova-mode .hp-return-orbit-text { fill: rgba(255, 255, 255, 0.55) !important; }
+        .heart-container.heart-nova-mode .hp-return-seal:hover .hp-return-orbit-text { fill: var(--teal-core) !important; }
+        .heart-container.heart-nova-mode .hp-return-seal-img {
+            border-color: rgba(0, 240, 255, 0.7) !important;
+            box-shadow: 0 0 35px rgba(0, 240, 255, 0.25) !important;
         }
-        @keyframes spinFlowerCW { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes heart-nova-pulse { 0%, 100% { filter: drop-shadow(0 0 40px rgba(0,240,255,0.9)) drop-shadow(0 0 80px rgba(0,240,255,0.6)) drop-shadow(0 0 130px rgba(0,240,255,0.3)) brightness(2.5); } 50% { filter: drop-shadow(0 0 60px rgba(0,240,255,1)) drop-shadow(0 0 100px rgba(0,240,255,0.7)) drop-shadow(0 0 150px rgba(0,240,255,0.4)) brightness(3); } }
+
 
         /* --- DEPLOYMENT ACCORDION --- */
         .deployment-node-wrapper { width: 100%; max-width: 900px; margin: 40px auto 20px; background: var(--glass-bg); backdrop-filter: var(--blur-heavy); -webkit-backdrop-filter: var(--blur-heavy); border: 1px solid rgba(255,255,255,0.9); border-radius: 16px; padding: 0 30px; box-shadow: var(--glass-shadow); position: relative; z-index: 1; }
@@ -1269,7 +1603,6 @@ width: 400px; height: 400px; border-radius: 50%;
             <a href="https://etherealconnectionsco.com" class="nav-brand">Ethereal Connections <em>Co.</em></a>
             <nav class="nav-links">
                 <a href="https://scan.etherealconnectionsco.com" target="_blank" class="nav-link">AI Scanner</a>
-                <a href="/why" class="nav-link">Why ECCO</a>
                 <a href="https://library.etherealconnectionsco.com" target="_blank" class="nav-link">AI Library</a>
                 <a href="https://toolkit.etherealconnectionsco.com" target="_blank" class="nav-link">Patron Toolkit</a>
                 <a href="https://commission.etherealconnectionsco.com" target="_blank" class="nav-cta">Commission ECCO →</a>
@@ -1280,6 +1613,14 @@ width: 400px; height: 400px; border-radius: 50%;
             <a href="https://flowerlab.etherealconnectionsco.com" target="_blank" class="nav-subtab">Flower of Life Lab</a>
             <span class="nav-subtab-sep">·</span>
             <a href="https://unified.etherealconnectionsco.com" target="_blank" class="nav-subtab">Unified Resonance Project</a>
+        </div>
+        <div class="nav-subtab-row">
+               <span class="nav-subtab-label">Doctrine:</span>
+            <a href="/why" target="_blank" class="nav-subtab">Why ECCO</a>
+            <span class="nav-subtab-sep">·</span>
+            <a href="https://etherealconnectionsco.com/master-context" target="_blank" class="nav-subtab">Master Context</a>
+            <span class="nav-subtab-sep">·</span>
+            <a href="https://spa.etherealconnectionsco.com" target="_blank" class="nav-subtab">Sovereign Provenance Architecture</a>
         </div>
     </header>
 
@@ -1371,7 +1712,7 @@ width: 400px; height: 400px; border-radius: 50%;
                 <div class="funnel-step" style="background: linear-gradient(135deg, rgba(0,240,255,0.06), rgba(0,168,168,0.04)); backdrop-filter: blur(20px) saturate(160%); border: 1px solid rgba(0,168,168,0.35); border-radius: 18px; padding: 28px; box-shadow: inset 0 0 0 1px rgba(0,240,255,0.18), 0 6px 20px rgba(0,168,168,0.08); height: 100%; transition: all 0.3s;">
                     <div style="font-family:'Rajdhani'; font-size:0.7rem; font-weight:700; letter-spacing:4px; color:var(--teal-dim); text-transform:uppercase; margin-bottom:12px;">Path B</div>
                     <h3 style="font-family:'Rajdhani'; font-weight:800; font-size:1.3rem; letter-spacing:1px; margin-bottom:10px;">Mirror Reflection</h3>
-                    <p style="font-family:'Inter'; font-size:0.9rem; color:#555; line-height:1.55;">A commissioned reflection — your business, your stack, your doctrine, rendered back to you as a deployable architecture. The Toolkit's senior counterpart.</p>
+                    <p style="font-family:'Inter'; font-size:0.9rem; color:#555; line-height:1.55;">A commissioned reflection — your business, your stack, your life, your doctrine, rendered back to you as a deployable architecture. See it in the wild: <a href="https://library.etherealconnectionsco.com/kat" target="_blank" style="color:var(--teal-dim); text-decoration:none; border-bottom:1px solid rgba(0,168,168,0.4);">a stack mirrored</a> · <a href="https://mirror.etherealconnectionsco.com/jowi" target="_blank" style="color:var(--teal-dim); text-decoration:none; border-bottom:1px solid rgba(0,168,168,0.4);">a life reflected</a>. Commission yours.</p>
                     <div style="margin-top:16px; font-family:'Rajdhani'; font-size:0.78rem; font-weight:700; letter-spacing:2px; color:var(--teal-dim); text-transform:uppercase;">Commission a Mirror →</div>
                 </div>
             </a>
@@ -1513,7 +1854,7 @@ width: 400px; height: 400px; border-radius: 50%;
         </div>
 
         <h2 class="pillars-header tiered-value-title" id="tiered-value" style="font-size: 2.2rem; letter-spacing: 10px; margin-bottom: 20px; opacity: 0.6;">DEEPER ARCHITECTURE</h2>
-        <p style="font-family:'Inter'; font-size:0.95rem; color:#666; text-align:center; max-width:620px; margin:0 auto 50px; line-height:1.6;">When the toolkit isn't enough — when you need the doctrine applied to a specific bottleneck — these are the engagements that operate alongside the funnel.</p>
+        <p style="font-family:'Inter'; font-size:0.95rem; color:#666; text-align:center; max-width:620px; margin:0 auto 50px; line-height:1.6;">When the toolkit isn't enough — when you need the doctrine applied to a specific bottleneck — these are the engagements that operate alongside the open path.</p>
         <div class="tier-stack">
             <div class="tier-acc">
                 <div class="tier-acc-header" onclick="toggleTierAcc(this)">
@@ -1587,26 +1928,27 @@ width: 400px; height: 400px; border-radius: 50%;
         </div>
 
         <!-- INTEGRITY STACK — 3-CARD VISIBLE ROW -->
-        <div style="text-align:center; margin-bottom:15px;">
+        <div style="text-align:center; margin-bottom:18px;">
             <span style="font-family:'Rajdhani'; font-size:0.9rem; letter-spacing:4px; color:var(--gold-structure); font-weight:800; text-transform:uppercase;">The Integrity Stack</span>
+            <div style="font-family:'Inter'; font-size:0.78rem; color:#777; margin-top:8px; max-width:560px; margin-left:auto; margin-right:auto; line-height:1.5; font-style:italic;">Categories of forensic capability ECCO scopes, selects, orchestrates, or builds. Named tools below are class exemplars, not partnerships.</div>
         </div>
         <div class="integrity-grid">
             <div class="integrity-card">
                 <div class="integrity-card-icon">⊙</div>
                 <div class="integrity-card-label">Visual Forensics</div>
-                <div class="integrity-card-powered">Powered by OpenSpace</div>
+                <div class="integrity-card-powered">Class exemplar · OpenSpace</div>
                 <div class="integrity-card-desc">360° cameras capture the site daily. AI compares imagery to the BIM model. If the drywall isn't there, the check doesn't clear.</div>
             </div>
             <div class="integrity-card">
                 <div class="integrity-card-icon">△</div>
                 <div class="integrity-card-label">Estimation Audit</div>
-                <div class="integrity-card-powered">Powered by Togal.ai</div>
+                <div class="integrity-card-powered">Class exemplar · Togal.ai</div>
                 <div class="integrity-card-desc">We scan blueprints to calculate exact material quantities. We prevent contractors from "fat-fingering" square footage.</div>
             </div>
             <div class="integrity-card">
                 <div class="integrity-card-icon">⚖</div>
                 <div class="integrity-card-label">Contract Defense</div>
-                <div class="integrity-card-powered">Powered by Document Crunch</div>
+                <div class="integrity-card-powered">Class exemplar · Document Crunch</div>
                 <div class="integrity-card-desc">AI scans thousands of pages of contracts to find "Killer Clauses" that transfer risk. We spot liability before you sign.</div>
             </div>
         </div>
@@ -1677,14 +2019,14 @@ width: 400px; height: 400px; border-radius: 50%;
     </section>
 
     <!-- INITIATE TRANSPARENCY AUDIT — front-and-center construction integrity intake -->
-    <section class="shadow-audit-section" id="shadow-audit">
-        <div class="shadow-audit-container">
-            <div class="shadow-audit-header">
-                <div class="shadow-audit-eyebrow">Construction Integrity · Forensic Audit</div>
-                <h2 class="shadow-audit-title">Initiate Transparency Audit</h2>
-                <p class="shadow-audit-lede">Send us one closed project file. We'll tell you exactly how much money you lost — backed by AI-driven forensic comparison against physical reality.</p>
+    <section class="transparency-audit-section" id="transparency-audit-">
+        <div class="transparency-audit-container">
+            <div class="transparency-audit-header">
+                <div class="transparency-audit-eyebrow">Construction Integrity · Forensic Audit</div>
+                <h2 class="transparency-audit-title">Initiate Transparency Audit</h2>
+                <p class="transparency-audit-lede">Send us one closed project file. We'll tell you exactly how much money you lost — backed by AI-driven forensic comparison against physical reality.</p>
             </div>
-            <div class="shadow-audit-form" id="shadow-audit-form">
+            <div class="transparency-audit-form" id="transparency-audit-form">
                 <div class="intake-row">
                     <div class="intake-field">
                         <label for="sa-name">Name <span class="req">*</span></label>
@@ -1726,11 +2068,11 @@ width: 400px; height: 400px; border-radius: 50%;
                     <textarea id="sa-context" rows="3" placeholder="Project type, status, timeline, anything that helps us calibrate the audit. We read every word."></textarea>
                 </div>
                 <div class="intake-actions">
-                    <button type="button" onclick="submitShadowAudit()" class="intake-submit shadow-audit-submit">Request Secure Upload Link &rarr;</button>
+                    <button type="button" onclick="submitTransparencyAudit()" class="intake-submit transparency-audit-submit">Request Secure Upload Link &rarr;</button>
                 </div>
-                <div id="shadow-audit-status" class="intake-status"></div>
-                <p class="shadow-audit-footnote">
-                    <span class="lock-glyph" aria-hidden="true">⚷</span> 256-bit encrypted intake · Zero-knowledge architecture · Personal reply within 48 hours
+                <div id="transparency-audit-status" class="intake-status"></div>
+                <p class="transparency-audit-footnote">
+                    <span class="lock-glyph" aria-hidden="true">⚷</span> Encrypted submission · Confidential · Personal reply within 48 hours
                 </p>
             </div>
         </div>
@@ -1780,6 +2122,10 @@ width: 400px; height: 400px; border-radius: 50%;
             <a href="https://mirror.etherealconnectionsco.com" target="_blank" style="font-family:'Rajdhani'; font-size:0.7rem; letter-spacing:1.5px; text-transform:uppercase; color:#666; text-decoration:none; padding:4px 0; font-weight:600; transition:color 0.3s;" onmouseover="this.style.color='var(--teal-dim)'" onmouseout="this.style.color='#666'">Mirror</a>
             <span style="color:var(--teal-dim); margin:0 8px; font-size:14px; opacity:0.6; vertical-align:middle; line-height:0;">·</span>
             <a href="https://commission.etherealconnectionsco.com" target="_blank" style="font-family:'Rajdhani'; font-size:0.7rem; letter-spacing:1.5px; text-transform:uppercase; color:#666; text-decoration:none; padding:4px 0; font-weight:600; transition:color 0.3s;" onmouseover="this.style.color='var(--teal-dim)'" onmouseout="this.style.color='#666'">Commission</a>
+            <span style="color:var(--teal-dim); margin:0 8px; font-size:14px; opacity:0.6; vertical-align:middle; line-height:0;">·</span>
+            <a href="https://etherealconnectionsco.com/master-context" target="_blank" style="font-family:'Rajdhani'; font-size:0.7rem; letter-spacing:1.5px; text-transform:uppercase; color:#666; text-decoration:none; padding:4px 0; font-weight:600; transition:color 0.3s;" onmouseover="this.style.color='var(--teal-dim)'" onmouseout="this.style.color='#666'">Master Context</a>
+            <span style="color:var(--teal-dim); margin:0 8px; font-size:14px; opacity:0.6; vertical-align:middle; line-height:0;">·</span>
+            <a href="https://spa.etherealconnectionsco.com" target="_blank" style="font-family:'Rajdhani'; font-size:0.7rem; letter-spacing:1.5px; text-transform:uppercase; color:#666; text-decoration:none; padding:4px 0; font-weight:600; transition:color 0.3s;" onmouseover="this.style.color='var(--teal-dim)'" onmouseout="this.style.color='#666'">SPA</a>
             <span style="color:var(--teal-dim); margin:0 8px; font-size:14px; opacity:0.6; vertical-align:middle; line-height:0;">·</span>
             <a href="mailto:info@etherealconnectionsco.com" style="font-family:'Rajdhani'; font-size:0.7rem; letter-spacing:1.5px; text-transform:uppercase; color:#666; text-decoration:none; padding:4px 0; font-weight:600; transition:color 0.3s;" onmouseover="this.style.color='var(--teal-dim)'" onmouseout="this.style.color='#666'">Contact</a>
         </div>
@@ -1875,6 +2221,58 @@ width: 400px; height: 400px; border-radius: 50%;
             <h1 class="transparency-title">THE TRANSPARENCY PROJECT</h1>
             <div class="dynamic-date" id="current-date">SYSTEM DATE LOCATING...</div>
             <div class="heart-container">
+                <!-- UPPER PORTAL = amplification .fol-seam (its lower portal): a glowing
+                     12-petal seed-of-life skeleton (Set A 12 subpaths + Set B 30° clone) over a
+                     circular cut to the neural field. Static. Petals scaled 1.14× about center so
+                     the tips push proud of the perimeter ring. Verbatim from amplification. -->
+                <div class="heart-upper-portal" aria-hidden="true">
+                    <div class="hup-seam-ring"></div>
+                    <div class="hup-seam">
+                        <svg class="hup-seam-svg" viewBox="368 86 444 444" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <path id="hupSeamA" d="M577.5 308.0L549.6 320.1L524.5 327.5L498.7 332.0L483.7 333.2L468.8 333.5L442.6 331.5L416.9 326.6L391.8 318.8L367.5 308.0L391.8 297.2L406.0 292.4L420.5 288.5L435.2 285.6L450.1 283.6L476.2 282.5L491.2 283.3L506.1 285.0L520.8 287.7L535.4 291.3L556.7 298.5L577.5 308.0ZM583.7 318.8L580.3 349.0L577.1 363.6L573.0 378.1L563.6 402.5L551.4 425.7L536.7 447.4L519.6 467.3L500.3 485.0L478.8 500.7L481.6 474.2L484.5 459.5L488.4 445.0L497.4 420.4L503.8 406.9L511.1 393.8L519.2 381.2L528.1 369.2L537.8 357.7L548.2 347.0L565.1 332.1L583.7 318.8ZM812.5 308.0L784.6 320.1L759.5 327.5L744.8 330.4L729.9 332.4L703.8 333.5L677.6 331.5L651.9 326.6L626.8 318.8L602.5 308.0L626.8 297.2L641.0 292.4L655.5 288.5L670.2 285.6L685.1 283.6L711.2 282.5L726.2 283.3L741.1 285.0L755.8 287.7L770.4 291.3L791.7 298.5L812.5 308.0ZM701.2 115.3L697.8 145.5L691.6 171.0L682.6 195.6L676.2 209.1L668.9 222.2L654.2 243.9L637.1 263.7L617.8 281.5L596.3 297.2L599.1 270.7L602.0 256.0L605.9 241.5L614.9 216.9L621.3 203.4L628.6 190.3L636.7 177.7L645.6 165.6L655.3 154.2L665.7 143.4L682.6 128.6L701.2 115.3ZM577.2 292.8L556.5 276.7L537.8 258.3L521.4 237.9L507.3 215.7L495.9 192.1L487.3 167.4L481.6 141.8L478.8 115.3L500.3 131.0L511.5 140.9L522.1 151.5L532.0 162.7L541.1 174.6L555.2 196.8L562.0 210.1L568.0 223.8L573.0 237.9L578.0 256.0L582.0 278.1L583.7 297.2L577.2 292.8ZM694.7 496.3L674.0 480.2L655.3 461.8L638.9 441.4L624.8 419.2L613.4 395.6L604.8 370.9L599.1 345.3L596.3 318.8L617.8 334.5L629.0 344.4L639.6 355.0L656.4 375.1L665.0 387.4L672.7 400.3L679.5 413.6L685.5 427.4L691.6 445.0L695.5 459.5L699.5 481.6L701.2 500.7L694.7 496.3ZM579.2 301.8L549.0 298.3L523.5 292.1L498.9 283.1L485.3 276.7L472.3 269.5L450.6 254.7L430.8 237.6L413.0 218.3L397.3 196.8L423.8 199.5L438.5 202.5L453.0 206.4L467.1 211.2L481.0 216.9L504.2 229.0L516.8 237.2L528.8 246.1L540.2 255.8L551.1 266.2L565.9 283.1L579.2 301.8ZM579.1 314.2L561.1 338.7L551.0 349.7L540.2 360.2L519.9 376.6L497.7 390.6L474.1 402.1L449.4 410.8L423.8 416.4L397.3 419.3L413.0 397.7L422.9 386.5L433.5 375.8L453.6 359.0L465.9 350.5L478.8 342.9L492.1 336.0L505.8 330.1L519.9 324.9L534.3 320.9L556.4 316.4L579.1 314.2ZM782.7 419.2L752.5 415.8L727.0 409.6L712.9 404.8L699.0 399.1L675.8 387.0L654.1 372.2L634.3 355.1L616.5 335.8L600.8 314.2L627.3 317.0L642.0 320.0L656.5 323.9L670.7 328.7L684.6 334.4L707.7 346.5L720.3 354.7L732.4 363.6L743.7 373.3L754.6 383.7L769.4 400.6L782.7 419.2ZM782.7 196.7L764.6 221.2L746.5 240.2L726.4 257.0L714.1 265.5L701.2 273.1L677.6 284.6L652.9 293.2L627.3 299.0L600.9 301.8L616.5 280.2L626.4 269.0L637.0 258.4L657.1 241.6L669.4 233.1L682.3 225.4L695.6 218.5L709.4 212.5L723.5 207.5L737.9 203.3L759.9 198.9L782.7 196.7ZM586.5 288.4L576.6 264.1L569.6 238.9L565.6 213.0L564.5 186.7L566.5 160.6L571.4 134.9L579.2 109.9L590.0 85.5L600.8 109.9L605.6 124.0L609.4 138.5L612.4 153.2L614.4 168.0L615.5 194.3L614.7 209.2L613.0 224.1L610.3 238.8L605.6 257.0L598.0 278.1L589.9 295.5L586.5 288.4ZM586.5 523.4L576.6 499.1L569.7 473.8L565.6 448.0L564.5 421.7L566.5 395.6L571.4 369.9L579.2 344.9L590.1 320.5L600.8 344.8L605.6 359.0L609.5 373.5L614.0 399.3L615.3 414.3L615.5 429.3L614.7 444.2L613.0 459.2L609.5 477.4L605.6 492.0L598.0 513.1L590.0 530.5L586.5 523.4Z"/>
+                                <path id="hupSeamB" d="M579.2 301.8L549.0 298.3L523.5 292.1L498.9 283.1L485.3 276.7L472.3 269.5L450.6 254.7L430.8 237.6L413.0 218.3L397.3 196.8L423.8 199.5L438.5 202.5L453.0 206.4L467.1 211.2L481.0 216.9L504.2 229.0L516.8 237.2L528.8 246.1L540.2 255.8L551.1 266.2L565.9 283.1L579.2 301.8ZM579.1 314.2L561.1 338.7L551.0 349.7L540.2 360.2L519.9 376.6L497.7 390.6L474.1 402.1L449.4 410.8L423.8 416.4L397.3 419.3L413.0 397.7L422.9 386.5L433.5 375.8L453.6 359.0L465.9 350.5L478.8 342.9L492.1 336.0L505.8 330.1L519.9 324.9L534.3 320.9L556.4 316.4L579.1 314.2ZM782.7 419.2L752.5 415.8L727.0 409.6L712.9 404.8L699.0 399.1L675.8 387.0L654.1 372.2L634.3 355.1L616.5 335.8L600.8 314.2L627.3 317.0L642.0 320.0L656.5 323.9L670.7 328.7L684.6 334.4L707.7 346.5L720.3 354.7L732.4 363.6L743.7 373.3L754.6 383.7L769.4 400.6L782.7 419.2ZM782.7 196.7L764.6 221.2L746.5 240.2L726.4 257.0L714.1 265.5L701.2 273.1L677.6 284.6L652.9 293.2L627.3 299.0L600.9 301.8L616.5 280.2L626.4 269.0L637.0 258.4L657.1 241.6L669.4 233.1L682.3 225.4L695.6 218.5L709.4 212.5L723.5 207.5L737.9 203.3L759.9 198.9L782.7 196.7ZM586.5 288.4L576.6 264.1L569.6 238.9L565.6 213.0L564.5 186.7L566.5 160.6L571.4 134.9L579.2 109.9L590.0 85.5L600.8 109.9L605.6 124.0L609.4 138.5L612.4 153.2L614.4 168.0L615.5 194.3L614.7 209.2L613.0 224.1L610.3 238.8L605.6 257.0L598.0 278.1L589.9 295.5L586.5 288.4ZM586.5 523.4L576.6 499.1L569.7 473.8L565.6 448.0L564.5 421.7L566.5 395.6L571.4 369.9L579.2 344.9L590.1 320.5L600.8 344.8L605.6 359.0L609.5 373.5L614.0 399.3L615.3 414.3L615.5 429.3L614.7 444.2L613.0 459.2L609.5 477.4L605.6 492.0L598.0 513.1L590.0 530.5L586.5 523.4Z"/>
+                                <clipPath id="hupClipA"><use href="#hupSeamA"/></clipPath>
+                                <clipPath id="hupClipB"><use href="#hupSeamB"/></clipPath>
+                                <filter id="hupTealBlur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>
+                                <radialGradient id="hupPetalFill" gradientUnits="userSpaceOnUse" cx="590" cy="308" r="222">
+                                    <stop offset="0%"   stop-color="#d8f3ee" stop-opacity="0.92"/>
+                                    <stop offset="18%"  stop-color="#bfeae3" stop-opacity="0.82"/>
+                                    <stop offset="45%"  stop-color="#a6ded5" stop-opacity="0.72"/>
+                                    <stop offset="78%"  stop-color="#9ad7cd" stop-opacity="0.62"/>
+                                    <stop offset="100%" stop-color="#cfeee8" stop-opacity="0.50"/>
+                                </radialGradient>
+                            </defs>
+                            <g transform="translate(-82.6 -43.12) scale(1.14)">
+                            <!-- BLACK HAIRLINE + OUTWARD DEPTH (light room) -->
+                            <use href="#hupSeamA" class="hup-petal-depth" fill="none" stroke="#000" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+                            <use href="#hupSeamB" class="hup-petal-depth" fill="none" stroke="#000" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+                            <!-- OPAQUE TEAL-GLASS PETAL FILLS (light room) -->
+                            <use href="#hupSeamA" class="hup-petal-fill" fill="url(#hupPetalFill)"/>
+                            <use href="#hupSeamB" class="hup-petal-fill" fill="url(#hupPetalFill)"/>
+                            <!-- Teal inner glow Set A clipped to petal interiors + crisp core -->
+                            <g clip-path="url(#hupClipA)">
+                                <use href="#hupSeamA" fill="none" stroke="rgb(78,212,200)" stroke-width="3"   stroke-linejoin="round" stroke-linecap="round" filter="url(#hupTealBlur)" opacity="0.85"/>
+                                <use href="#hupSeamA" fill="none" stroke="rgb(78,212,200)" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" filter="url(#hupTealBlur)" opacity="0.9"/>
+                            </g>
+                            <use href="#hupSeamA" fill="none" stroke="rgb(78,212,200)" stroke-width="0.4" stroke-linejoin="round" stroke-linecap="round"/>
+                            <!-- Teal inner glow Set B (30° clone) -->
+                            <g clip-path="url(#hupClipB)">
+                                <use href="#hupSeamB" fill="none" stroke="rgb(78,212,200)" stroke-width="3"   stroke-linejoin="round" stroke-linecap="round" filter="url(#hupTealBlur)" opacity="0.85"/>
+                                <use href="#hupSeamB" fill="none" stroke="rgb(78,212,200)" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" filter="url(#hupTealBlur)" opacity="0.9"/>
+                            </g>
+                            <use href="#hupSeamB" fill="none" stroke="rgb(78,212,200)" stroke-width="0.4" stroke-linejoin="round" stroke-linecap="round"/>
+                            <!-- FULL BLACK PETAL TRACE (light room) -->
+                            <use href="#hupSeamA" class="hup-petal-trace" fill="none" stroke="#000" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round"/>
+                            <use href="#hupSeamB" class="hup-petal-trace" fill="none" stroke="#000" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round"/>
+                            <!-- Edge glow (teal-core in daylight, gold/white in nova, via .hup-seam-glow-* CSS) -->
+                            <use href="#hupSeamA" class="hup-seam-glow-gold"  fill="none" stroke="#d8b87a" stroke-width="1.06" stroke-linejoin="round" stroke-linecap="round"/>
+                            <use href="#hupSeamA" class="hup-seam-glow-white" fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round"/>
+                            <use href="#hupSeamB" class="hup-seam-glow-gold"  fill="none" stroke="#d8b87a" stroke-width="1.06" stroke-linejoin="round" stroke-linecap="round"/>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
                 <div class="heart-copy">
                     <p>You've discovered the Heart of ECCO! This is our E-AXIOM MANDATE: Ethereal Connections Co. ETHOS. Well done, and thank you for taking the risk.</p>
                     <br>
@@ -1889,23 +2287,55 @@ width: 400px; height: 400px; border-radius: 50%;
                     <textarea class="glass-input" id="heart-user-scripture" placeholder="ENTER YOUR SCRIPTURE HERE..."></textarea>
                     
                     </div>
-                <div style="display:flex; justify-content:center; margin-top:30px;">
-                    <div class="archive-button-container" onclick="submitHeartScripture()">
-                        <svg viewBox="0 0 100 100" class="archive-halo-svg">
-                            <circle cx="50" cy="50" r="20"/><circle cx="50" cy="30" r="20"/><circle cx="50" cy="70" r="20"/><circle cx="32.68" cy="40" r="20"/><circle cx="67.32" cy="40" r="20"/><circle cx="32.68" cy="60" r="20"/><circle cx="67.32" cy="60" r="20"/>
-                        </svg>
-                        <svg viewBox="0 0 100 100" class="archive-blue-overlay" aria-hidden="true">
-                            <circle cx="50" cy="50" r="20"/><circle cx="50" cy="30" r="20"/><circle cx="50" cy="70" r="20"/><circle cx="32.68" cy="40" r="20"/><circle cx="67.32" cy="40" r="20"/><circle cx="32.68" cy="60" r="20"/><circle cx="67.32" cy="60" r="20"/>
-                        </svg>
-                        <svg viewBox="0 0 100 100" class="archive-blue-overlay archive-blue-overlay-ccw" aria-hidden="true">
-                            <circle cx="50" cy="50" r="20"/><circle cx="50" cy="30" r="20"/><circle cx="50" cy="70" r="20"/><circle cx="32.68" cy="40" r="20"/><circle cx="67.32" cy="40" r="20"/><circle cx="32.68" cy="60" r="20"/><circle cx="67.32" cy="60" r="20"/>
-                        </svg>
-                        <span class="archive-text-overlay">ARCHIVE</span>
-                    </div>
-                </div>
                 <div id="heart-success-msg">
                     We're Honored for your time, consideration, feedback, your current frequency & look forward to getting back to you with a resonant response!
                 </div>
+                <!-- HEART PORTAL — replaces former archive-button-container.
+                     Pre-archive: flower-of-life with pulsing ARCHIVE text (submits scripture).
+                     Post-archive: ECCO seal with rotating orbit text (exits to main page).
+                     Cutout in the glass substrate is positioned by JS via --portal-x/--portal-y. -->
+                <div class="heart-portal" id="heart-portal" onclick="submitHeartScripture()">
+
+                    <!-- PRE-ARCHIVE STATE: amplification upper-portal geometry, teal-core glow -->
+                    <div class="heart-portal-flower">
+                        <div class="hp-ring" aria-hidden="true"></div>
+
+                        <div class="hp-flowers" aria-hidden="true">
+                            <!-- 3 LAYERS: fixed anchor (no rotation), CW spin, CCW spin.
+                                 Procedurally filled by buildLowerPortalFlowers() (canonical FOL). -->
+                            <svg class="hp-flower hp-flower-fixed" viewBox="-300 -300 600 600" id="hp-flower-fixed-host"></svg>
+                            <svg class="hp-flower hp-flower-cw"    viewBox="-300 -300 600 600" id="hp-flower-cw-host"></svg>
+                            <svg class="hp-flower hp-flower-ccw"   viewBox="-300 -300 600 600" id="hp-flower-ccw-host"></svg>
+                        </div>
+
+                        <!-- Inner seed-of-life · 3 layers · hidden in daylight, restored in nova -->
+                        <div class="hp-seed hp-seed-fixed" aria-hidden="true">
+                            <svg viewBox="-180 -180 360 360" id="hp-seed-fixed-host"></svg>
+                        </div>
+                        <div class="hp-seed hp-seed-cw" aria-hidden="true">
+                            <svg viewBox="-180 -180 360 360" id="hp-seed-cw-host"></svg>
+                        </div>
+                        <div class="hp-seed hp-seed-ccw" aria-hidden="true">
+                            <svg viewBox="-180 -180 360 360" id="hp-seed-ccw-host"></svg>
+                        </div>
+
+                        <!-- ARCHIVE text · pulsing centerpiece -->
+                        <span class="hp-archive-text">ARCHIVE</span>
+                    </div>
+
+                    <!-- POST-ARCHIVE STATE: ECCO seal with rotating orbit text · the way out -->
+                    <div class="heart-portal-seal">
+                        <a href="#" class="hp-return-seal" onclick="exitHeartRoom(event)">
+                            <img src="seal.jpg" alt="Return Seal" class="hp-return-seal-img" onerror="this.src='seal.png'">
+                            <svg class="hp-return-orbit-svg" viewBox="0 0 240 240">
+                                <path id="orbitPathPortal" d="M 120, 120 m -96, 0 a 96,96 0 1,1 192,0 a 96,96 0 1,1 -192,0" fill="none"/>
+                                <text><textPath href="#orbitPathPortal" class="hp-return-orbit-text" startOffset="0%" textLength="603">RETURN TO ECCO'S MAIN PORTAL • RETURN TO ECCO'S MAIN PORTAL • </textPath></text>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Legacy bottom return-seal — hidden via CSS (exit lives at portal location now). Markup retained for safe revert. -->
                 <div class="heart-return-wrapper">
                     <a href="#" class="heart-return-seal" onclick="exitHeartRoom(event)">
                         <img src="seal.jpg" alt="Return Seal" class="return-seal-img" onerror="this.src='seal.png'">
@@ -1919,7 +2349,7 @@ width: 400px; height: 400px; border-radius: 50%;
         </div>
     </div>
 
-        <script>
+    <script>
         const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', dateOptions);
         const tx = document.getElementById('heart-user-scripture');
@@ -2020,7 +2450,7 @@ width: 400px; height: 400px; border-radius: 50%;
                 title: "Contact Team ECCO",
                 body: `
                     <p style="font-family:'Inter'; font-size:0.95rem; color:#555; line-height:1.6; text-align:center; max-width:540px; margin:18px auto 26px;">
-                        Tell us about your operation. We respond personally — typically within 48 hours, often the same day. No autoresponders, no funnels.
+                        Tell us about your operation. We respond personally — typically within 48 hours, often the same day. No autoresponders.
                     </p>
                     <div class="intake-form" id="intake-form">
                         <div class="intake-row">
@@ -2147,7 +2577,7 @@ width: 400px; height: 400px; border-radius: 50%;
             }, 900);
         }
 
-        function submitShadowAudit() {
+        function submitTransparencyAudit() {
             const get = id => (document.getElementById(id) || {}).value || '';
             const name    = get('sa-name').trim();
             const company = get('sa-company').trim();
@@ -2155,8 +2585,8 @@ width: 400px; height: 400px; border-radius: 50%;
             const value   = get('sa-value');
             const concern = get('sa-concern');
             const ctx     = get('sa-context').trim();
-            const status  = document.getElementById('shadow-audit-status');
-            const btn     = document.querySelector('.shadow-audit-submit');
+            const status  = document.getElementById('transparency-audit-status');
+            const btn     = document.querySelector('.transparency-audit-submit');
             if (!status) return;
 
             status.className = 'intake-status';
@@ -2274,6 +2704,45 @@ width: 400px; height: 400px; border-radius: 50%;
             vid.addEventListener('ended', () => { vid.style.display = 'none'; enterHeartRoom(); }, { once: true });
         }
 
+        /* --- Procedurally generate the lower portal's canonical Flower-of-Life SVGs ---
+           Hexagonal FOL lattice: circle radius R, adjacent centers exactly R apart (touching =
+           canonical). Ring k has 6k circles (k>0) + 1 center; total at maxRing k = 1 + 3k(k+1).
+           Rotation permutes within a ring, never adds rings — so each layer carries every ring it
+           displays. fol61 = ring-4 (61 circles, outer); fol19 = ring-2 (19 circles, inner). */
+        (function buildLowerPortalFlowers(){
+            function generateFOL(maxRing, R) {
+                const sqrt3 = Math.sqrt(3);
+                const out = [];
+                for (let q = -maxRing; q <= maxRing; q++) {
+                    for (let r = -maxRing; r <= maxRing; r++) {
+                        if (Math.max(Math.abs(q), Math.abs(r), Math.abs(q+r)) <= maxRing) {
+                            out.push([
+                                Math.round((R*q + R/2*r) * 100) / 100,
+                                Math.round((R*sqrt3/2*r) * 100) / 100
+                            ]);
+                        }
+                    }
+                }
+                return out;
+            }
+            const R = 60;
+            const fol61 = generateFOL(4, R);  // canonical 4-ring FOL (61 circles) — OUTER
+            const fol19 = generateFOL(2, R);  // canonical 2-ring FOL (19 circles) — INNER
+            function makeGroup(circles, cls, rot) {
+                const t = (rot != null) ? ` transform="rotate(${rot})"` : '';
+                return `<g class="${cls}"${t}>` +
+                    circles.map(([x,y]) => `<circle cx="${x}" cy="${y}" r="${R}"/>`).join('') +
+                    `</g>`;
+            }
+            const g = id => document.getElementById(id);
+            if (g('hp-flower-fixed-host')) g('hp-flower-fixed-host').innerHTML = makeGroup(fol61, 'hp-petal');
+            if (g('hp-flower-cw-host'))    g('hp-flower-cw-host').innerHTML    = makeGroup(fol61, 'hp-petal');
+            if (g('hp-flower-ccw-host'))   g('hp-flower-ccw-host').innerHTML   = makeGroup(fol61, 'hp-petal');
+            if (g('hp-seed-fixed-host'))   g('hp-seed-fixed-host').innerHTML   = makeGroup(fol19, 'hp-petal-seed');
+            if (g('hp-seed-cw-host'))      g('hp-seed-cw-host').innerHTML      = makeGroup(fol19, 'hp-petal-seed');
+            if (g('hp-seed-ccw-host'))     g('hp-seed-ccw-host').innerHTML     = makeGroup(fol19, 'hp-petal-seed');
+        })();
+
         /* --- THE ECCO HEART ROOM PROTOCOLS --- */
         function enterHeartRoom() {
             document.body.classList.add('white-room-mode');
@@ -2281,76 +2750,77 @@ width: 400px; height: 400px; border-radius: 50%;
             heartRoom.style.display = 'block'; window.scrollTo(0, 0); 
             setTimeout(() => { heartRoom.style.opacity = '1'; }, 100);
             document.querySelector('.orb-text').style.display = 'block'; document.querySelector('.orb-hint-dare').style.display = 'block'; document.querySelector('.orb-hint-click').style.display = 'block'; document.querySelector('.orb-est').style.display = 'block';
+            // Align the glass-cutout to the portal's actual position (twice — once after layout, once after fonts/images settle)
+            setTimeout(alignHeartPortalCutout, 200);
+            setTimeout(alignHeartPortalCutout, 1000);
         }
+
+        /* Measure the portal's center within the heart-container and write CSS vars
+           so the radial-gradient mask cutout aligns. Called on enter, on resize, and
+           on any size change of the heart-container (textarea growth, content swap). */
+        function alignHeartPortalCutout() {
+            const hc = document.querySelector('.heart-container');
+            const portal = document.getElementById('heart-portal');
+            if (!hc || !portal) return;
+            const hcRect = hc.getBoundingClientRect();
+            if (hcRect.width === 0) return; // not yet displayed
+            const pRect = portal.getBoundingClientRect();
+            const cx = (pRect.left + pRect.width / 2) - hcRect.left;
+            const cy = (pRect.top  + pRect.height / 2) - hcRect.top;
+            hc.style.setProperty('--portal-x', cx + 'px');
+            hc.style.setProperty('--portal-y', cy + 'px');
+            // Upper portal cutout — measure its center too so the second glass hole tracks.
+            const up = document.querySelector('.heart-upper-portal');
+            if (up) {
+                const uRect = up.getBoundingClientRect();
+                const ux = (uRect.left + uRect.width / 2) - hcRect.left;
+                const uy = (uRect.top  + uRect.height / 2) - hcRect.top;
+                hc.style.setProperty('--upper-x', ux + 'px');
+                hc.style.setProperty('--upper-y', uy + 'px');
+            }
+        }
+        window.addEventListener('resize', alignHeartPortalCutout);
+        if (typeof ResizeObserver !== 'undefined') {
+            window.addEventListener('DOMContentLoaded', function() {
+                const hc = document.querySelector('.heart-container');
+                if (hc) new ResizeObserver(alignHeartPortalCutout).observe(hc);
+            });
+        }
+        // Safety-net realignment for initial render delay (both portals). Harmless no-ops while
+        // the room is display:none (width===0 → early return); enterHeartRoom() does the real pass.
+        setTimeout(alignHeartPortalCutout, 100);
+        setTimeout(alignHeartPortalCutout, 600);
+        setTimeout(alignHeartPortalCutout, 1500);
 
         function submitHeartScripture() {
             const text = document.getElementById('heart-user-scripture').value;
-            if(text.trim() === '') return;
-            
-            const btnText = document.querySelector('.archive-text-overlay');
-            const archiveHalo = document.querySelector('.archive-halo-svg');
-            btnText.innerText = 'ARCHIVED';
-            btnText.classList.add('archived');
-            setTimeout(() => {
-                btnText.style.display = 'none';
-                var ac = document.querySelector('.archive-button-container');
-                var hc = document.querySelector('.heart-container');
-                var seal = document.querySelector('.heart-return-seal');
-                if(ac && hc && seal) {
-                    document.body.appendChild(ac);
-                    ac.classList.add('archive-nova-mode');
-                    hc.classList.add('heart-nova-mode');
-                    document.querySelector('.heart-wrapper').classList.add('nova-active');
-                    function positionFlowerOnSeal() {
-                        if(!ac.classList.contains('archive-nova-mode')) return;
-                        var r = seal.getBoundingClientRect();
-                        ac.style.left = (r.left + r.width / 2) + 'px';
-                        ac.style.top = (r.top + r.height / 2) + 'px';
-                        // cutout relative to heart-container
-                        var el2 = seal, cTop = 0, cLeft = 0;
-                        while(el2 && el2 !== hc) {
-                            cTop += el2.offsetTop;
-                            cLeft += el2.offsetLeft;
-                            el2 = el2.offsetParent;
-                        }
-                        cTop += seal.offsetHeight / 2;
-                        cLeft += seal.offsetWidth / 2;
-                        hc.style.setProperty('--cutout-x', cLeft + 'px');
-                        hc.style.setProperty('--cutout-y', cTop + 'px');
-                    }
-                    positionFlowerOnSeal();
-                    window._novaResizeHandler = function() { positionFlowerOnSeal(); };
-                    window.addEventListener('resize', window._novaResizeHandler);
-                    var wr = document.getElementById('ethos-white-room');
-                    if(wr) wr.addEventListener('scroll', window._novaResizeHandler);
-                }
-                document.body.classList.add('heart-nova-active');
-            }, 1300);
-            
+            if (text.trim() === '') return;
+
+            const hc = document.querySelector('.heart-container');
+            const portal = document.getElementById('heart-portal');
+
+            // Pre-empt double-clicks: lock the portal until exit
+            if (portal && portal.classList.contains('seal-state')) return;
+
+            // Hide interactive section, reveal success message (in the space the textarea vacates)
+            document.getElementById('heart-interactive-section').style.display = 'none';
+            document.getElementById('heart-success-msg').style.display = 'block';
+
+            // White room → dark room transition + portal flower → seal swap
+            document.body.classList.add('heart-nova-active');
+            if (hc) hc.classList.add('heart-nova-mode');
+            if (portal) portal.classList.add('seal-state');
+
+            // Realign cutout after layout shift (interactive section hides, success-msg appears)
+            setTimeout(alignHeartPortalCutout, 60);
+            setTimeout(alignHeartPortalCutout, 400);
+            setTimeout(alignHeartPortalCutout, 900);
+
+            // Fire scripture to GAS intake — heart_archive bucket (no-cors, fire-and-forget)
             fetch('https://etherealconnectionsco.com/api/intake', {
                 method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ source: 'heart_archive', timestamp: new Date().toISOString(), email: "HEART_ARCHIVE", scripture: text })
             });
-
-            setTimeout(() => {
-                document.getElementById('heart-interactive-section').style.display = 'none';
-                document.getElementById('heart-success-msg').style.display = 'block';
-                btnText.classList.remove('archived');
-                btnText.innerText = 'ARCHIVE';
-                btnText.style.display = '';
-                var ac2 = document.querySelector('.archive-button-container');
-                if(ac2) {
-                    ac2.classList.remove('archive-nova-mode');
-                    ac2.style.left = ''; ac2.style.top = '';
-                    var hwReset = document.querySelector('.heart-wrapper');
-                    if(hwReset) hwReset.classList.remove('nova-active');
-                    var hcReset = document.querySelector('.heart-container');
-                    if(hcReset) { hcReset.style.removeProperty('--cutout-x'); hcReset.style.removeProperty('--cutout-y'); }
-                    if(window._novaResizeHandler) { window.removeEventListener('resize', window._novaResizeHandler); var wr2 = document.getElementById('ethos-white-room'); if(wr2) wr2.removeEventListener('scroll', window._novaResizeHandler); window._novaResizeHandler = null; }
-                    var origParent = document.querySelector('.heart-container div[style*="display:flex"][style*="justify-content:center"]');
-                    if(origParent) origParent.appendChild(ac2);
-                }
-            }, 1200);
         }
 
         function exitHeartRoom(e) {
@@ -2382,10 +2852,11 @@ width: 400px; height: 400px; border-radius: 50%;
                 document.getElementById('heart-interactive-section').style.display = 'block';
                 document.getElementById('heart-success-msg').style.display = 'none';
                 document.getElementById('heart-user-scripture').value = '';
-                var acExit = document.querySelector('.archive-button-container');
+                // Reset portal: dark glass → white glass, seal → flower
                 var hcExit = document.querySelector('.heart-container');
-                if(acExit) { acExit.classList.remove('archive-nova-mode'); acExit.style.left = ''; acExit.style.top = ''; var hwR2 = document.querySelector('.heart-wrapper'); if(hwR2) hwR2.classList.remove('nova-active'); var hcR2 = document.querySelector('.heart-container'); if(hcR2) { hcR2.style.removeProperty('--cutout-x'); hcR2.style.removeProperty('--cutout-y'); } if(window._novaResizeHandler) { window.removeEventListener('resize', window._novaResizeHandler); var wr3 = document.getElementById('ethos-white-room'); if(wr3) wr3.removeEventListener('scroll', window._novaResizeHandler); window._novaResizeHandler = null; } var origP = document.querySelector('.heart-container div[style*="display:flex"][style*="justify-content:center"]'); if(origP) origP.appendChild(acExit); }
-                if(hcExit) hcExit.classList.remove('heart-nova-mode');
+                var portalExit = document.getElementById('heart-portal');
+                if (hcExit) hcExit.classList.remove('heart-nova-mode');
+                if (portalExit) portalExit.classList.remove('seal-state');
                 document.getElementById('hero-section').scrollIntoView({behavior: 'instant'});
             }, 1000);
 
