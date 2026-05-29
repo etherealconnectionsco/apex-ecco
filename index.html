@@ -2816,6 +2816,17 @@ width: 400px; height: 400px; border-radius: 50%;
             setTimeout(alignHeartPortalCutout, 400);
             setTimeout(alignHeartPortalCutout, 900);
 
+			// Carry the viewer from the seal (bottom) back up to the upper portal.
+            // Small delay so the success-msg/interactive layout settles and the
+            // nova (day→night) transition is already underway — the upward travel
+            // then reveals the shift, and the descent forces a re-read en route to the exit.
+            const room = document.getElementById('ethos-white-room');
+            if (room) {
+                setTimeout(() => {
+                    room.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 350);
+            }
+			
             // Fire scripture to GAS intake — heart_archive bucket (no-cors, fire-and-forget)
             fetch('https://etherealconnectionsco.com/api/intake', {
                 method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
